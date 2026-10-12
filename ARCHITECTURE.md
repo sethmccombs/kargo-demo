@@ -60,9 +60,11 @@ registry: public.ecr.aws/nginx/nginx
    repeats the same process into their own namespaces/regions.
 
 
-## Bonus
+## Bonus Notes (more to elaborate in person, just jotting down some notes here)
 
 - ApplicationSet / Fan Out Example - I opted for a list generator in the application set YAML, but also left some comments to stub out a method I've used in the past, to generate apps off a YAML file (or multiple in nested directories) useful for single-tenant clusters
 - OSS ArgoCD vs Kargo - 
   - ArgoCD is the deployment tool, while Kargo is the layer on top, allowing promotion across environments (clusters, namespaces, etc)
   - ArgoCD is the "what's deployed" and "is it healthy/synced,etc" - Kargo handles the "what version, what envs, is it verified (whatever that may mean in a given case)"
+  - There are some shared functionality - such that ArgoCD with the source hydrator can "render" manifests, while Kargo could also perform that as a step in a given stage
+- Rendered Manifests - I've got some (rather hack-y) bash scripts to render and commit helm charts, for CI-based rendering - not in place here, but I've got some demo repos I could show if desired
