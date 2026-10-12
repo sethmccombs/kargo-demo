@@ -9,11 +9,12 @@ regions (`east`, `west`).
 - **Freight** — an immutable, uniquely identified set of artifacts (here, a
   container image tag) produced from a `Warehouse`. It is the unit that is
   promoted and verified through the pipeline.
+  - Freight can also be manifests like a Helm chart, a git revision or a combination of all three
 - **Warehouse** — monitors artifact sources (e.g. a container registry) for
   changes and produces new `Freight`. It answers "what changed / what should be
   tested this time?".
 - **Stage** — a phase in the delivery pipeline that maps to an Argo CD
-  Application and a concrete environment (namespace). A Stage requests Freight
+  Application and a concrete environment. A Stage requests Freight
   (from a Warehouse and/or an upstream Stage), and once verified/healthy there,
   downstream Stages can request it.
 
@@ -42,9 +43,9 @@ registry: public.ecr.aws/nginx/nginx
 
 ## How a promotion works (end to end)
 
-1. `Warehouse` polls `public.ecr.aws/nginx/nginx`; a new tag updates the Freight
-   set. New `Freight` becomes immediately available to `dev` (direct) and is
-   picked up as available if it flows through `dev`.
+1. The `Warehouse` polls `public.ecr.aws/nginx/nginx`; (can be any image)
+   - a new tag updates the Freight
+      set. New `Freight` becomes immediately available to `dev`
 2. Promoting to a Stage runs the reusable `demo-promo-process` `PromotionTask`:
    - `git-clone` the ops repo, opening `stage/<stage>` from `main`,
    - `kustomize-set-image` in `base` to the exact Freight image tag,
@@ -58,32 +59,12 @@ registry: public.ecr.aws/nginx/nginx
 4. Once `dev` is verified, Freight is available to `east`/`west`; promoting there
    repeats the same process into their own namespaces/regions.
 
-## Possible change to explain, and a real-customer pattern
 
-**The change:** replacing the tutorial's linear `test → uat → prod` with a
-**pre-prod `dev` gate that fans out to parallel production regions** (`east`,
-`west`).
+## Bonus Notes (more to elaborate in person, just jotting down some notes here)
 
-**Real-customer pattern:** multi-region production delivery. A team can verify
-Freight once in a shared pre-production Stage, then promote the *same* Freight to
-multiple production regions (e.g., US-East / US-West / EU) rather than
-re-building and re-inventing promotion logic per region. Because promotion is
-Git-based and metadata is retained, the promotion is auditable and reproducible
-across regions.
-
-## Positioning Kargo vs. scripts/homegrown tooling
-
-- **Git is the truth and the audit trail.** Every promotion is a commit to a
-  `stage/<stage>` branch; Kargo retains history of *what* (Freight SHA), *how*
-  (PromotionTask steps), *when/whom*. Scripts bury this in logs/locally.
-- **Declarative, reusable, reviewable.** Pipelines are `Warehouse`/`Stage`/
-  `PromotionTask` CRs in Git (self-documenting), so changes go through review —
-  unlike a bespoke shell script no one owns.
-- **Built-in verification & ordering.** Stages express upstream/downstream
-  dependencies and Argo CD health; Freight can't skip a gate. Homegrown tooling
-  re-implements promotion gating, retries, and health checks from scratch.
-- **UI, RBAC, and self-service.** The Kargo Dashboard gives engineers a promotion
-  "push-button" plus a live Freight timeline; RBAC gates who can promote where.
-- **Standards vs. bespoke.** Kargo + Argo CD is a lintable, testable, upgradeable
-  code path rather than an ad-hoc deployment engine that drifts from your
-  GitOps model.
+- ApplicationSet / Fan Out Example - I opted for a list generator in the application set YAML, but also left some comments to stub out a method I've used in the past, to generate apps off a YAML file (or multiple in nested directories) useful for single-tenant clusters
+- OSS ArgoCD vs Kargo - 
+  - ArgoCD is the deployment tool, while Kargo is the layer on top, allowing promotion across environments (clusters, namespaces, etc)
+  - ArgoCD is the "what's deployed" and "is it healthy/synced,etc" - Kargo handles the "what version, what envs, is it verified (whatever that may mean in a given case)"
+  - There are some shared functionality - such that ArgoCD with the source hydrator can "render" manifests, while Kargo could also perform that as a step in a given stage
+- Rendered Manifests - I've got some (rather hack-y) bash scripts to render and commit helm charts, for CI-based rendering - not in place here, but I've got some demo repos I could show if desired
