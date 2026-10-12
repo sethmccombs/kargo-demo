@@ -8,6 +8,8 @@ metadata:
 spec:
   # One Argo CD Application per Kargo Stage. Each tracks the stage-specific
   # branch (`stage/<stage>`) that Kargo's PromotionTask renders and pushes.
+  #
+  # ACTIVE generator: a simple list (dev/east/west).
   generators:
     - list:
         elements:
@@ -17,6 +19,23 @@ spec:
             namespace: east
           - stage: west
             namespace: west
+  #
+  # ALTERNATIVE (demo): drive the same Applications from a YAML list in this
+  # repo using the ApplicationSet *Git* generator. To try it, comment-out the
+  # `list` generator above and uncomment the block below:
+  #
+  # generators:
+  #   - git:
+  #       repoURL: https://github.com/sethmccombs/kargo-demo.git
+  #       revision: main
+  #       files:
+  #         - path: argocd/regions.yaml
+  #
+  # regions.yaml is a YAML list, one entry per region/stage. The Git generator
+  # iterates it and exposes the same `{{stage}}`/`{{namespace}}` params as the
+  # active list generator, so swapping the generator type needs NO template
+  # change — a clean way to show how regions/environments can be added in Git
+  # without editing the ApplicationSet itself.
   template:
     metadata:
       name: kargo-product-{{stage}}

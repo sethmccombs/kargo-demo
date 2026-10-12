@@ -1,0 +1,9 @@
+# Regions (dev pre-prod + production regions) driven by the ApplicationSet.
+# This is a YAML list so the ApplicationSet *Git* generator iterates it and
+# exposes each entry as {stage, namespace} — a drop-in for the list generator.
+- stage: dev
+  namespace: dev
+- stage: east
+  namespace: east
+- stage: west
+  namespace: west
