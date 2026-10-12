@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  # Named `kargo-product` (not `product`) to avoid colliding with the sibling
+  # argocd-demo repo's own `product` ApplicationSet in the same argocd namespace.
+  name: kargo-product
+  namespace: argocd
+spec:
+  # One Argo CD Application per Kargo Stage. Each tracks the stage-specific
+  # branch (`stage/<stage>`) that Kargo's PromotionTask renders and pushes.
+  generators:
+    - list:
+        elements:
+          - stage: dev
+            namespace: dev
+          - stage: east
+            namespace: east
+          - stage: west
+            namespace: west
+  template:
+    metadata:
+      name: kargo-product-{{stage}}
+      annotations:
+        kargo.akuity.io/authorized-stage: product:{{stage}}
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/sethmccombs/kargo-demo.git
+        targetRevision: stage/{{stage}}
+        path: .
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
