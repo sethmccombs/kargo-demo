@@ -50,8 +50,11 @@ kargo-demo/
 
 ## Setup (runbook)
 
-1. Install Kargo additively onto the existing cluster:
-   `helm install kargo oci://ghcr.io/akuity/kargo-charts/kargo --namespace kargo-system --create-namespace`
+1. Install Kargo additively onto the existing cluster (chart 1.12.4, values in
+   `kargo/helm-values.yaml`). The admin secrets are passed at install time and
+   are not committed. See the comment at the top of that file for the full command:
+   `helm install kargo oci://ghcr.io/akuity/kargo-charts/kargo --version 1.12.4 --namespace kargo-system --create-namespace -f kargo/helm-values.yaml --set-string api.adminAccount.passwordHash=... --set-string api.adminAccount.tokenSigningKey=...`
+   Kargo is then served at `https://bazzite.tailc1546e.ts.net:8443` via `tailscale serve`.
 2. `kargo login <kargo-server>` (admin) and install/download the `kargo` CLI.
 3. Apply the Argo CD `ApplicationSet`:
    `kubectl apply -k argocd/`

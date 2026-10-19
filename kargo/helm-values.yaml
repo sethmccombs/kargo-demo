@@ -1,0 +1,28 @@
+# Helm values for the Kargo install (chart oci://ghcr.io/akuity/kargo-charts/kargo, 1.12.4).
+#
+# Install (run on bazzite, after Argo CD is up and the Dex static client exists).
+# The admin account secrets are required by the chart and must NOT be committed.
+# Pass them at install time (bcrypt hash of a local admin password, and a random
+# signing key):
+#   helm install kargo oci://ghcr.io/akuity/kargo-charts/kargo --version 1.12.4 \
+#     --namespace kargo-system --create-namespace \
+#     -f kargo/helm-values.yaml \
+#     --set-string api.adminAccount.passwordHash="$KARGO_ADMIN_BCRYPT" \
+#     --set-string api.adminAccount.tokenSigningKey="$(openssl rand -base64 29 | tr -d '=+/' | cut -c1-32)"
+#
+# The Kargo API is served by `tailscale serve` on port 8443 as plain HTTP
+# (api.tls is off by default in this chart), so the tailscale target is
+# http://localhost:31443.
+api:
+  # Public host (tailnet) including the port. Used for OIDC redirect URLs.
+  host: bazzite.tailc1546e.ts.net:8443
+  service:
+    type: NodePort
+    nodePort: 31443
+  oidc:
+    enabled: true
+    # Argo CD's bundled Dex. Discovery for this issuer happens from the Kargo
+    # API pod, so the pod must be able to resolve and reach this hostname.
+    issuerURL: https://bazzite.tailc1546e.ts.net/api/dex
+    # Static client defined in argocd/base/argocd-cm-patch.yaml.
+    clientID: kargo
