@@ -1,0 +1,13 @@
+apiVersion: kargo.akuity.io/v1alpha1
+kind: ProjectConfig
+metadata:
+  name: product
+  namespace: product
+spec:
+  promotionPolicies:
+    # east: auto-promote once Freight is verified in staging.
+    - stage: east
+      autoPromotionEnabled: true
+    # west: manual promotion (production approval).
+    - stage: west
+      autoPromotionEnabled: false
