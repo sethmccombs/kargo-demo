@@ -6,7 +6,7 @@ metadata:
 spec:
   vars:
     - name: gitopsRepo
-      value: https://github.com/sethmccombs/kargo-demo.git
+      value: https://github.com/sethmccombs/manifests.git
     - name: imageRepo
       value: public.ecr.aws/nginx/nginx
   steps:
@@ -14,7 +14,9 @@ spec:
       config:
         repoURL: ${{ vars.gitopsRepo }}
         checkout:
-          - branch: main
+          # Pin the exact manifests commit recorded in the Freight, not the
+          # branch head, so a promotion ships what Freight captured.
+          - commit: ${{ commitFrom(vars.gitopsRepo).ID }}
             path: ./src
           - branch: stage/${{ ctx.stage }}
             create: true
