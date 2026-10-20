@@ -3,6 +3,8 @@
 # exposes each entry as {stage, namespace} — a drop-in for the list generator.
 - stage: dev
   namespace: dev
+- stage: staging
+  namespace: staging
 - stage: east
   namespace: east
 - stage: west

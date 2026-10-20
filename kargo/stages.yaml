@@ -20,7 +20,7 @@ spec:
 apiVersion: kargo.akuity.io/v1alpha1
 kind: Stage
 metadata:
-  name: east
+  name: staging
   namespace: product
 spec:
   requestedFreight:
@@ -40,6 +40,26 @@ spec:
 apiVersion: kargo.akuity.io/v1alpha1
 kind: Stage
 metadata:
+  name: east
+  namespace: product
+spec:
+  requestedFreight:
+    - origin:
+        kind: Warehouse
+        name: product
+      sources:
+        stages:
+          - staging
+  promotionTemplate:
+    spec:
+      steps:
+        - task:
+            name: demo-promo-process
+          as: promo-process
+---
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Stage
+metadata:
   name: west
   namespace: product
 spec:
@@ -49,7 +69,7 @@ spec:
         name: product
       sources:
         stages:
-          - dev
+          - staging
   promotionTemplate:
     spec:
       steps:
