@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: product
+  labels:
+    # Marks the namespace as a Kargo Project's namespace.
+    kargo.akuity.io/project: "true"
+  annotations:
+    # Argo CD must never prune or delete this namespace. Deleting it removes
+    # every Kargo resource in it (Project, Warehouse, Stages, Freight).
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
