@@ -46,7 +46,7 @@ spec:
     spec:
       project: application
       source:
-        repoURL: https://github.com/sethmccombs/kargo-demo.git
+        repoURL: https://github.com/sethmccombs/manifests.git
         targetRevision: stage/{{stage}}
         path: .
       destination:

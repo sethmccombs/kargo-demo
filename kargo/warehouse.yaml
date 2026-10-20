@@ -5,6 +5,12 @@ metadata:
   namespace: product
 spec:
   subscriptions:
+    # Image builds: new tags become Freight.
     - image:
         repoURL: public.ecr.aws/nginx/nginx
         discoveryLimit: 5
+    # Manifest commits on main: each new commit (config or manifest change)
+    # becomes Freight, so a config-only change can be promoted.
+    - git:
+        repoURL: https://github.com/sethmccombs/manifests.git
+        branch: main
