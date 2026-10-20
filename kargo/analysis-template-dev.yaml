@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: product-http-check-dev
+  namespace: product
+spec:
+  metrics:
+    - name: http-check
+      # One Job per verification. Retries happen inside the Job so a slow
+      # rollout gets several chances before the check fails.
+      count: 1
+      failureLimit: 0
+      provider:
+        job:
+          spec:
+            backoffLimit: 0
+            template:
+              spec:
+                restartPolicy: Never
+                containers:
+                  - name: curl
+                    image: curlimages/curl:8.10.1
+                    command: ["sh", "-c"]
+                    args:
+                      - |
+                        for i in 1 2 3 4 5; do
+                          if curl -fsS -o /dev/null --max-time 5 http://product.dev.svc.cluster.local/; then
+                            echo "attempt $i: HTTP OK"; exit 0
+                          fi
+                          echo "attempt $i: failed, retrying"; sleep 5
+                        done
+                        echo "product did not respond after 5 attempts"; exit 1
