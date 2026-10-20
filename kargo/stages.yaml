@@ -6,6 +6,9 @@ metadata:
   annotations:
     kargo.akuity.io/color: "#2E7D32"
 spec:
+  verification:
+    analysisTemplates:
+      - name: product-http-check-dev
   requestedFreight:
     - origin:
         kind: Warehouse
