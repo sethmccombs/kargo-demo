@@ -16,7 +16,7 @@ spec:
         app.kubernetes.io/name: product
     spec:
       containers:
-      - image: public.ecr.aws/nginx/nginx:1.31.6
+      - image: public.ecr.aws/nginx/nginx:1.31.7
         livenessProbe:
           httpGet:
             path: /
