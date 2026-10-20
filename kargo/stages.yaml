@@ -30,6 +30,9 @@ spec:
       sources:
         stages:
           - dev
+  verification:
+    analysisTemplates:
+      - name: product-http-check
   promotionTemplate:
     spec:
       steps:
