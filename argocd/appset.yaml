@@ -42,7 +42,7 @@ spec:
       annotations:
         kargo.akuity.io/authorized-stage: product:{{stage}}
     spec:
-      project: default
+      project: application
       source:
         repoURL: https://github.com/sethmccombs/kargo-demo.git
         targetRevision: stage/{{stage}}
